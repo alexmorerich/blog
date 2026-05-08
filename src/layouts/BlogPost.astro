@@ -7,7 +7,7 @@ import Header from '../components/Header.astro';
 
 type Props = CollectionEntry<'blog'>['data'];
 
-const { title, description, pubDate, updatedDate, tags } = Astro.props;
+const { title, description, pubDate, updatedDate, tags, source } = Astro.props;
 ---
 
 <!doctype html>
@@ -41,6 +41,27 @@ const { title, description, pubDate, updatedDate, tags } = Astro.props;
 				font-style: italic;
 				margin-top: 0.25em;
 			}
+			.source-link {
+				margin-top: 2em;
+				padding-top: 1em;
+				border-top: 1px solid rgb(var(--gray-light));
+			}
+			.source-link a {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.4em;
+				font-size: 0.9rem;
+				color: rgb(var(--gray));
+				text-decoration: none;
+				padding: 0.5em 1em;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 6px;
+				transition: color 0.15s, border-color 0.15s;
+			}
+			.source-link a:hover {
+				color: var(--accent);
+				border-color: var(--accent);
+			}
 		</style>
 	</head>
 	<body>
@@ -71,6 +92,13 @@ const { title, description, pubDate, updatedDate, tags } = Astro.props;
 						}
 					</div>
 					<slot />
+					{source && (
+						<div class="source-link">
+							<a href={source} target="_blank" rel="noopener noreferrer">
+								▶ 在小红书上查看原帖
+							</a>
+						</div>
+					)}
 				</div>
 			</article>
 		</main>
