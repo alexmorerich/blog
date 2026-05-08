@@ -15,7 +15,7 @@
 # DEPLOY FLOW
 #   1. Obsidian saves a .md file inside your Publish/ folder
 #   2. fswatch fires → frontmatter is normalised → file copied to src/content/blog/
-#   3. git commit + push origin master && push master:main
+#   3. git commit + push origin main
 #   4. Cloudflare picks up the change on `main` and re-deploys automatically
 
 set -uo pipefail
@@ -75,7 +75,7 @@ handle_file() {
 
     git commit -m "sync: $filename"
 
-    if git push origin master && git push origin master:main; then
+    if git push origin main; then
         echo "[$ts] Pushed → GitHub (Cloudflare deploy triggered)"
     else
         echo "[$ts] WARNING: push failed — changes committed locally, retry manually." >&2
