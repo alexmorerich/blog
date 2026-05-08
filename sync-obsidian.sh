@@ -21,7 +21,7 @@
 set -uo pipefail
 
 # ── Config ────────────────────────────────────────────────────────────────────
-OBSIDIAN_PUBLISH_DIR="${OBSIDIAN_PUBLISH_DIR:-$HOME/Documents/Obsidian/Publish}"
+OBSIDIAN_PUBLISH_DIR="${OBSIDIAN_PUBLISH_DIR:-/Users/alexkou/Library/Mobile Documents/iCloud~md~obsidian/Documents/Publish}"
 BLOG_DIR="$(cd "$(dirname "$0")" && pwd)"
 BLOG_CONTENT_DIR="$BLOG_DIR/src/content/blog"
 NORMALIZE="$BLOG_DIR/normalize_frontmatter.py"
