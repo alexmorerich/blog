@@ -122,6 +122,57 @@ hr {
 	}
 }
 
+.post-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.post-list li {
+	padding: 1.5em 0;
+	border-bottom: 1px solid rgb(var(--gray-light));
+}
+.post-list li:last-child {
+	border-bottom: none;
+}
+.post-list time {
+	display: block;
+	font-size: 0.8rem;
+	color: rgb(var(--gray));
+	margin-bottom: 0.25em;
+}
+.post-list > li > a {
+	font-size: 1.1rem;
+	font-weight: 700;
+	color: rgb(var(--black));
+	text-decoration: none;
+}
+.post-list > li > a:hover {
+	color: var(--accent);
+}
+.post-list p {
+	margin: 0.35em 0 0.5em;
+	font-size: 0.9rem;
+	color: rgb(var(--gray));
+	line-height: 1.5;
+}
+.tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4em;
+	margin-top: 0.5em;
+}
+.tag {
+	font-size: 0.75rem;
+	color: rgb(var(--gray));
+	background: rgb(var(--gray-light));
+	padding: 0.15em 0.5em;
+	border-radius: 3px;
+	text-decoration: none;
+}
+.tag:hover {
+	color: var(--accent);
+}
+
 .sr-only {
 	border: 0;
 	padding: 0;
