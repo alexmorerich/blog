@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""normalize_frontmatter.py <src.md> <dest.md>
+"""normalize_frontmatter.py <src.md> <dest.md> [--media-src <dir>]
 
 Reads an Obsidian Markdown file, normalises its frontmatter to be
 Astro content-collection compatible, and writes the result to dest.
@@ -13,12 +13,16 @@ Transformations applied
   - Converts YAML block-style tag lists to inline YAML array
   - Drops Obsidian-only keys: aliases, alias, cssclass, cssClasses, publish
   - Outputs keys in canonical Astro order
+  - Converts ![[media/file]] wiki-links → ![](/media/file) and copies media files
 """
 
 import re
+import shutil
 import sys
 from datetime import date
 from pathlib import Path
+
+WIKI_LINK_RE = re.compile(r'!\[\[([^\]]+)\]\]')
 
 FRONTMATTER_RE = re.compile(r'\A---[ \t]*\n(.*?)\n---[ \t]*\n?', re.DOTALL)
 OBSIDIAN_DROP = {'aliases', 'alias', 'cssclass', 'cssClasses', 'publish'}
@@ -86,7 +90,31 @@ def build_frontmatter(fm: dict) -> str:
     return '\n'.join(lines)
 
 
-def normalize(src: Path, dest: Path) -> None:
+def convert_wiki_media(body: str, media_src: Path | None, media_dest: Path) -> str:
+    """Replace ![[media/file]] with ![](/media/file) and copy files."""
+    def replace(m: re.Match) -> str:
+        ref = m.group(1)  # e.g. "media/hash.jpg" or just "hash.jpg"
+        # Normalize to just the filename
+        fname = Path(ref).name
+        if media_src:
+            candidate = media_src / fname
+            if not candidate.exists():
+                # Try treating ref as relative path directly under media_src parent
+                candidate = media_src.parent / ref
+            if candidate.exists():
+                media_dest.mkdir(parents=True, exist_ok=True)
+                dest_file = media_dest / fname
+                if not dest_file.exists():
+                    shutil.copy2(candidate, dest_file)
+                    print(f'[normalize] copied media: {fname}')
+            else:
+                print(f'[normalize] warn: media not found: {ref}', file=sys.stderr)
+        return f'![](/media/{fname})'
+
+    return WIKI_LINK_RE.sub(replace, body)
+
+
+def normalize(src: Path, dest: Path, media_src: Path | None = None) -> None:
     content = src.read_text(encoding='utf-8')
     fm, body = parse_frontmatter(content)
 
@@ -113,14 +141,26 @@ def normalize(src: Path, dest: Path) -> None:
 
     fm.setdefault('tags', '[]')
 
+    # Convert Obsidian wiki-link images to standard markdown + copy files
+    # dest = blog/src/content/blog/post.md → blog root is 4 levels up
+    blog_root = dest.parent.parent.parent.parent
+    media_dest = blog_root / 'public' / 'media'
+    body = convert_wiki_media(body, media_src, media_dest)
+
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(build_frontmatter(fm) + '\n' + body, encoding='utf-8')
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print(f'Usage: {sys.argv[0]} <src.md> <dest.md>', file=sys.stderr)
+    args = sys.argv[1:]
+    media_src = None
+    if '--media-src' in args:
+        idx = args.index('--media-src')
+        media_src = Path(args[idx + 1])
+        args = args[:idx] + args[idx + 2:]
+    if len(args) != 2:
+        print(f'Usage: {sys.argv[0]} <src.md> <dest.md> [--media-src <dir>]', file=sys.stderr)
         sys.exit(1)
-    src, dest = Path(sys.argv[1]), Path(sys.argv[2])
-    normalize(src, dest)
+    src, dest = Path(args[0]), Path(args[1])
+    normalize(src, dest, media_src)
     print(f'[normalize] {src.name} → {dest}')

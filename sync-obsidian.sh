@@ -22,6 +22,7 @@ set -uo pipefail
 
 # ── Config ────────────────────────────────────────────────────────────────────
 OBSIDIAN_PUBLISH_DIR="${OBSIDIAN_PUBLISH_DIR:-/Users/alexkou/Library/Mobile Documents/iCloud~md~obsidian/Documents/Publish}"
+OBSIDIAN_MEDIA_SRC="${OBSIDIAN_MEDIA_SRC:-/Users/alexkou/Library/Mobile Documents/iCloud~md~obsidian/Documents/rednote/media}"
 BLOG_DIR="$(cd "$(dirname "$0")" && pwd)"
 BLOG_CONTENT_DIR="$BLOG_DIR/src/content/blog"
 NORMALIZE="$BLOG_DIR/normalize_frontmatter.py"
@@ -60,7 +61,7 @@ handle_file() {
     echo "[$ts] ── $filename"
 
     # Normalize frontmatter and write to blog content dir
-    if ! python3 "$NORMALIZE" "$src" "$dest"; then
+    if ! python3 "$NORMALIZE" "$src" "$dest" --media-src "$OBSIDIAN_MEDIA_SRC"; then
         echo "[$ts] ERROR: normalization failed — skipping." >&2
         return 0
     fi
